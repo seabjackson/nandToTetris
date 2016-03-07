@@ -42,5 +42,39 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+   // zero x: zx
+   Mux16(a = x, b = false, sel = zx, out = zxout);
+
+   // negate x: nx 
+   Not16(in = zxout, out = notx);
+   // Mux can be used to select this negated x or the original x value
+   Mux16(a = zxout, b = notx, sel = nx, out = nxout);
+
+   // zero y: zy
+   Mux16(a = y, b = false, sel = zy, out = zyout);
+
+   // negate y: ny
+   Not16(in = zyout, out = noty);
+   Mux16(a = zyout, b = noty, sel = ny, out = nyout);
+
+   // f is either x & y or x + y
+   Add16(a = nxout, b = nyout, out = add16out);
+
+   And16(a = nxout, b = nyout, out = and16out);
+
+   // use a Mux to select which f
+   Mux16(a = and16out, b = add16out, sel = f, out = fout);
+
+   // negate output if this is selected: no
+   Not16(in = fout, out = noout);
+   Mux16(a = fout, b = noout, sel = no, out[15] = ng, out[0..15] = bitsout, out = out);
+
+
+   // if out 
+   Not(in = zrout, out = zr);
+
+   Or16Way(in = bitsout, out = zrout);
+   
+
+
 }
